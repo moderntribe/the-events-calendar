@@ -16,10 +16,11 @@
  * @see tribe_get_event() For the format of the event object.
  */
 
+$classes = tribe_get_post_class( [ 'tribe-events-calendar-month__calendar-event-tooltip' ], $event->ID );
 ?>
 <div class="tribe-events-calendar-month__calendar-event-tooltip-template tribe-common-a11y-hidden">
 	<div
-		class="tribe-events-calendar-month__calendar-event-tooltip"
+		<?php tribe_classes( $classes ) ?>
 		id="tribe-events-tooltip-content-<?php echo esc_attr( $event->ID ); ?>"
 		role="tooltip"
 	>
