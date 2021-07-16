@@ -3,11 +3,17 @@
  * Handles Views v2 Customizer settings.
  *
  * @since   5.3.1
+ * @deprecated TBD
+ *
+ * @deprecated TBD
  *
  * @package Tribe\Events\Views\V2
  */
 
 namespace Tribe\Events\Views\V2;
+
+_deprecated_file( __FILE__, 'TBD', 'Tribe\Events\Views\V2\Customizer' );
+
 use WP_Customize_Color_Control as Color_Control;
 use WP_Customize_Control as Control;
 
@@ -15,6 +21,7 @@ use WP_Customize_Control as Control;
  * Class Customizer
  *
  * @since   5.3.1
+ * @deprecated TBD
  *
  * @package Tribe\Events\Views\V2
  */
@@ -219,9 +226,7 @@ class Customizer {
 	 *
 	 * @return string The filtered CSS template.
 	 */
-	public function filter_global_elements_css_template( $css_template, $section ) {
-		$customizer = tribe( 'customizer' );
-
+	public function filter_global_elements_css_template( $css_template, $section, $customizer ) {
 		$settings = $customizer->get_option( [ $section->ID ] );
 		// These allow us to continue to _not_ target the shortcode.
 		$apply_to_shortcode = apply_filters( 'tribe_customizer_should_print_shortcode_customizer_styles', false );
@@ -378,10 +383,10 @@ class Customizer {
 					background-color: <%= global_elements.accent_color %>;
 				}
 
-				.tribe-common.tribe-events-widget .tribe-events-widget-events-list__view-more-link {
-					color: <%= global_elements.accent_color %>;
-				}
-			";
+			.tribe-common.tribe-events-widget .tribe-events-widget-events-list__view-more-link {
+				color: <%= global_elements.accent_color %>;
+			}
+		";
 
 			// overrides for the widget view more link
 			$css_template .= '
@@ -465,12 +470,6 @@ class Customizer {
 				}
 			";
 
-			$css_template .= "
-				.tribe-theme-twentytwentyone $tribe_common .tribe-common-c-btn:not(:hover):not(:active) {
-					background-color: <%= global_elements.accent_color %>;
-				}
-			";
-
 			// overrides for common components/full/buttons/_solid.pcss.
 			$css_template .= "
 				$tribe_common .tribe-common-c-btn,
@@ -516,10 +515,10 @@ class Customizer {
 			";
 
 			$css_template .= "
-				.tribe-theme-twentytwenty $tribe_common .tribe-common-c-btn {
-					background-color: <%= global_elements.accent_color %>;
-				}
-			";
+			.tribe-theme-twentytwenty $tribe_common .tribe-common-c-btn {
+				background-color: <%= global_elements.accent_color %>;
+			}
+		";
 
 			$css_template .= "
 				.tribe-theme-twentyseventeen $tribe_common .tribe-common-c-btn:hover,
@@ -582,34 +581,34 @@ class Customizer {
 
 			/* @todo replace this with the variable var(--color-background) when we make those available */
 			$css_template .= "
-				$tribe_events .tribe-events-c-ical__link:hover,
-				$tribe_events .tribe-events-c-ical__link:focus,
-				$tribe_events .tribe-events-c-ical__link:active {
-					color: #fff;
-					background-color: <%= global_elements.accent_color %>;
-					border-color: <%= global_elements.accent_color %>;
-				}
-			";
+			$tribe_events .tribe-events-c-ical__link:hover,
+			$tribe_events .tribe-events-c-ical__link:focus,
+			$tribe_events .tribe-events-c-ical__link:active {
+				color: #fff;
+				background-color: <%= global_elements.accent_color %>;
+				border-color: <%= global_elements.accent_color %>;
+			}
+		";
 
 			// overrides for tec components/full/_view-selector.pcss.
 			$css_template .= "
-				$tribe_events .tribe-events-c-view-selector__button:before {
-					background-color: <%= global_elements.accent_color %>;
-				}
-			";
+			$tribe_events .tribe-events-c-view-selector__button:before {
+				background-color: <%= global_elements.accent_color %>;
+			}
+		";
 
 			// overrides for tec views/full/list/_event.pcss.
 			$css_template .= "
-				$tribe_events .tribe-events-calendar-list__event-row--featured .tribe-events-calendar-list__event-date-tag-datetime:after {
-					background-color: <%= global_elements.accent_color %>;
-				}
-			";
+			$tribe_events .tribe-events-calendar-list__event-row--featured .tribe-events-calendar-list__event-date-tag-datetime:after {
+				background-color: <%= global_elements.accent_color %>;
+			}
+		";
 
 			$css_template .= "
-				.tribe-common--breakpoint-medium$tribe_events .tribe-events-calendar-list__event-datetime-featured-text {
-					color: <%= global_elements.accent_color %>;
-				}
-			";
+			.tribe-common--breakpoint-medium$tribe_events .tribe-events-calendar-list__event-datetime-featured-text {
+				color: <%= global_elements.accent_color %>;
+			}
+		";
 
 			// overrides for tec views/full/month/_calendar-event.pcss.
 			$css_template .= "
@@ -722,7 +721,7 @@ class Customizer {
 			// Single Event styles overrides
 			// This is under filter_global_elements_css_template() in order to have
 			// access to global_elements.accent_color, which is under a different section.
-			if ( $this->should_add_single_view_v2_styles() ) {
+			if ( tribe( 'events.views.v2.customizer.single-event' )->should_add_single_view_v2_styles() ) {
 				$css_template .= '
 					.tribe-events-cal-links .tribe-events-gcal,
 					.tribe-events-cal-links .tribe-events-ical,
@@ -778,9 +777,7 @@ class Customizer {
 	 *
 	 * @return string The filtered CSS template.
 	 */
-	public function filter_single_event_css_template( $css_template, $section ) {
-		$customizer = tribe( 'customizer' );
-
+	public function filter_single_event_css_template( $css_template, $section, $customizer ) {
 		if (
 			$customizer->has_option( $section->ID, 'post_title_color_choice' )
 			&& 'custom' === $customizer->get_option( [ $section->ID, 'post_title_color_choice' ] )
@@ -794,39 +791,5 @@ class Customizer {
 		}
 
 		return $css_template;
-	}
-
-	/**
-	 * Enqueues Customizer controls styles specific to Views v2 components.
-	 *
-	 * @since 5.4.0
-	 */
-	public function enqueue_customizer_controls_styles() {
-		tribe_asset_enqueue( 'tribe-customizer-views-v2-controls' );
-	}
-
-	/**
-	 * Check whether the Single Event styles overrides can be applied
-	 *
-	 * @return false/true
-	 */
-	public function should_add_single_view_v2_styles() {
-		// Bail if not Single Event.
-		if ( ! tribe( Template_Bootstrap::class )->is_single_event() ) {
-			return false;
-		}
-
-		// Bail if Block Editor.
-		if ( has_blocks( get_queried_object_id() ) ) {
-			return false;
-		}
-
-		// Use the function from provider.php to check if V2 is not enabled
-		// or the TRIBE_EVENTS_WIDGETS_V2_DISABLED constant is true.
-		if ( ! tribe_events_single_view_v2_is_enabled() ) {
-			return false;
-		}
-
-		return true;
 	}
 }

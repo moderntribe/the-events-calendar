@@ -7,15 +7,12 @@
  */
 
 namespace Tribe\Events\Views\V2\Customizer\Section;
-
-use Tribe__Utils__Color;
-
 /**
  * Month View
  *
  * @since 5.7.0
  */
-class Month_View extends \Tribe__Customizer__Section {
+final class Month_View extends \Tribe__Customizer__Section {
 
 	/**
 	 * ID of the section.
@@ -32,7 +29,7 @@ class Month_View extends \Tribe__Customizer__Section {
 	 *
 	 * @var integer
 	 */
-	public $queue_priority = 20;
+	public $queue_priority = 25;
 
 	/**
 	 * This method will be executed when the Class is Initialized.
@@ -65,7 +62,7 @@ class Month_View extends \Tribe__Customizer__Section {
 	 */
 	public function setup_arguments() {
 		return [
-			'priority'	=> 65,
+			'priority'	=> 15,
 			'capability'  => 'edit_theme_options',
 			'title'	   => esc_html__( 'Month View', 'the-events-calendar' ),
 		];
@@ -193,11 +190,6 @@ class Month_View extends \Tribe__Customizer__Section {
 			'grid_background_color'           => [
 				'priority'        => 18, // This should come immediately after 'grid_background_color_choice'.
 				'type'            => 'color',
-				'active_callback' => function( $control ) use ( $customizer ) {
-					$setting_name = $customizer->get_setting_name( 'grid_background_color_choice', $control->section );
-					$value = $control->manager->get_setting( $setting_name )->value();
-					return $this->defaults['grid_background_color_choice'] !== $value;
-				},
 			],
 			'tooltip_background_color'        => [
 				'priority'    => 18, // This should come immediately after 'grid_background_color_choice'.
@@ -231,13 +223,6 @@ class Month_View extends \Tribe__Customizer__Section {
 						)
 					)
 				],
-				'active_callback' => function( $control ) use ( $customizer ) {
-					$setting_name = $customizer->get_setting_name( 'grid_background_color_choice', $control->section );
-					$value = $control->manager->get_setting( $setting_name )->value();
-					// No point in giving them the option if the background color isn't set to use.
-					return $this->should_include_setting_css( 'background_color_choice', 'global_elements' ) && $this->defaults['grid_background_color_choice'] === $value;
-				},
-
 			],
 			'grid_lines_color'                => [
 				'priority' => 13,
@@ -284,11 +269,6 @@ class Month_View extends \Tribe__Customizer__Section {
 			'multiday_event_bar_color'        => [
 				'priority'        => 9,
 				'type'    => 'color',
-				'active_callback' => function( $control ) use ( $customizer ) {
-					$setting_name = $customizer->get_setting_name( 'multiday_event_bar_color_choice', $control->section );
-					$value = $control->manager->get_setting( $setting_name )->value();
-					return $this->defaults['multiday_event_bar_color_choice'] !== $value;
-				},
 			],
 			'grid_hover_color'              => [
 				'priority'    => 15,
@@ -310,43 +290,40 @@ class Month_View extends \Tribe__Customizer__Section {
 	/**
 	 * Grab the CSS rules template
 	 *
-	 * @param string $template The Customizer CSS string/template.
+	 * @param string $css_template The Customizer CSS string/template.
 	 *
 	 * @return string The Customizer CSS string/template, with v2 Month View styles added.
 	 */
-	public function get_css_template( $template ) {
+	public function get_css_template( $css_template ) {
 		if ( ! tribe_events_views_v2_is_enabled() ) {
-			return $template;
+			return $css_template;
 		}
 
-		// These allow us to continue to _not_ target the shortcode.
-		$apply_to_shortcode = apply_filters( 'tribe_customizer_should_print_shortcode_customizer_styles', false );
-		$tribe_events = $apply_to_shortcode ? '.tribe-events' : '.tribe-events:not( .tribe-events-view--shortcode )';
+		// It's all custom props now, baby...
+		$css_template .= "
+			:root {
+		";
 
 		if ( $this->should_include_setting_css( 'grid_lines_color' ) ) {
-			$template .= "
-				$tribe_events.tribe-common--breakpoint-medium .tribe-events-calendar-month__body,
-				$tribe_events.tribe-common--breakpoint-medium .tribe-events-calendar-month__day,
-				$tribe_events.tribe-common--breakpoint-medium .tribe-events-calendar-month__week {
-					border-color: <%= month_view.grid_lines_color %>;
-				}
+			$css_template .= "
+				--tec-color-border-secondary-month-grid: <%= month_view.grid_lines_color %>;
 			";
 		}
 
 		if ( $this->should_include_setting_css( 'grid_hover_color' ) ) {
-			$template .= "
-				$tribe_events.tribe-common--breakpoint-medium .tribe-events-calendar-month__day:hover::after {
-					background-color: <%= month_view.grid_hover_color %>;
-				}
+			$css_template .= "
+				--tec-color-border-active-month-grid-hover: <%= month_view.grid_hover_color %>;
 			";
 		}
 
 		if ( $this->should_include_setting_css( 'grid_background_color_choice' ) ) {
 			if ( $this->should_include_setting_css( 'grid_background_color' ) ) {
-				$template .="
-					$tribe_events .tribe-events-calendar-month__body {
-						background-color: <%= month_view.grid_background_color %>;
-					}
+				$css_template .="
+					--tec-color-background-month-grid: <%= month_view.grid_background_color %>;
+				";
+			} else {
+				$css_template .="
+					--tec-color-background-month-grid: #FFFFFF;
 				";
 			}
 		} else {
@@ -354,55 +331,46 @@ class Month_View extends \Tribe__Customizer__Section {
 				$this->should_include_setting_css( 'tooltip_background_color' )
 				&& $this->should_include_setting_css( 'background_color_choice', 'global_elements' )
 			) {
-				$template .="
-					.tooltipster-base.tribe-events-tooltip-theme,
-					.tooltipster-base.tribe-events-tooltip-theme--hover {
-						background-color: <%= global_elements.background_color %>;
-					}
+				$css_template .="
+					--tec-color-background-tooltip: <%= global_elements.background_color %>;
 				";
 			}
 		}
 
 		if ( $this->should_include_setting_css( 'days_of_week_color' )  ) {
-			$template .="
-				$tribe_events .tribe-events-calendar-month__header-column-title {
-					color: <%= month_view.days_of_week_color %>;
-				}
+			$css_template .="
+				--tec-color-text-day-of-week-month: <%= month_view.days_of_week_color %>;
 			";
 		}
 
 		if ( $this->should_include_setting_css( 'date_marker_color' )  ) {
-			$template .="
-				.tribe-events-calendar-month__day-date.tribe-common-h4,
-				$tribe_events .tribe-events-calendar-month__day-date-link,
-				$tribe_events .tribe-events-calendar-month__day:not(.tribe-events-calendar-month__day--current) .tribe-events-calendar-month__day-date-daynum {
-					color: <%= month_view.date_marker_color %>;
-				}
+			$css_template .="
+				--tec-color-day-marker-month: <%= month_view.date_marker_color %>;
+				--tec-color-day-marker-past-month: <%= month_view.date_marker_color %>;
 			";
 		}
 
 		if ( $this->should_include_setting_css( 'multiday_event_bar_color_choice' ) ) {
 			if ( $this->should_include_setting_css( 'multiday_event_bar_color' ) ) {
-				$bar_color_obj   = new Tribe__Utils__Color( $this->get_option( 'multiday_event_bar_color' ) );
-				$bar_color_arr   = $bar_color_obj->getRgb();
-				$bar_color_rgb   = $bar_color_arr['R'] . ',' . $bar_color_arr['G'] . ',' . $bar_color_arr['B'];
+				$bar_color_rgb   = $this->get_rgb_color( 'multiday_event_bar_color' );
 				$bar_color       = 'rgba(' . $bar_color_rgb . ',0.24)';
 				$bar_color_hover = 'rgba(' . $bar_color_rgb . ',0.34)';
 
-				$template .="
-					$tribe_events .tribe-events-calendar-month__multiday-event:not(.tribe-events-calendar-month__multiday-event--past) .tribe-events-calendar-month__multiday-event-bar-inner {
-						background-color: $bar_color;
-					}
-
-					$tribe_events tribe-events-calendar-month__multiday-event:not(.tribe-events-calendar-month__multiday-event--past) .tribe-events-calendar-month__multiday-event-bar-inner--hover,
-					$tribe_events tribe-events-calendar-month__multiday-event:not(.tribe-events-calendar-month__multiday-event--past) .tribe-events-calendar-month__multiday-event-bar-inner--focus {
-						background-color: $bar_color_hover;
-					}
+				$css_template .="
+					--tec-color-background-primary-multiday: {$bar_color};
+					--tec-color-background-primary-multiday-hover: {$bar_color_hover};
+					--tec-color-background-primary-multiday-active: {$bar_color_hover};
+					--tec-color-background-secondary-multiday: {$bar_color};
+					--tec-color-background-secondary-multiday-hover: {$bar_color_hover};
 				";
 			}
 		}
 
-		return $template;
+		$css_template .= "
+			}
+		";
+
+		return $css_template;
 	}
 
 	/* Deprecated */
@@ -466,6 +434,7 @@ class Month_View extends \Tribe__Customizer__Section {
 
 		return tribe( 'customizer' )->get_setting_link( 'global_elements', 'background_color_choice', $label_text );
 	}
+
 
 	/**
 	 * Gets the link to the accent color setting in Customizer.
